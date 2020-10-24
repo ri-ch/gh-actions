@@ -1,0 +1,21 @@
+name: "check-terraform"
+on: [push]
+jobs:
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install Terraform
+        run: |
+          wget https://releases.hashicorp.com/terraform/0.13.5/terraform_0.13.5_linux_amd64.zip
+          unzip terraform_0.13.5_linux_amd64.zip -d ./bin
+      - name: Set AWS credentials
+        run: |
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY_SECRET }}" >> $GITHUB_ENV
+      - name: Init terraform
+        run: ./bin/terraform init terraform
+      - name: Validate Terraform
+        run: ./bin/terraform validate terraform
