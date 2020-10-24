@@ -1,8 +1,11 @@
-name: "check-terraform"
-on: [push]
+name: "application-deploy"
+on:
+  push:
+    branches:
+      - "main"
 jobs:
-  terraform:
-    name: 'Terraform'
+  application:
+    name: 'application'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

@@ -58,7 +58,8 @@ data "aws_iam_policy_document" "deployment-policy-document" {
     sid = "1"
     effect = "Allow"
     actions = [
-      "s3:*"
+      "s3:*",
+      "apigateway:*"
     ]
     resources = [
         "*"

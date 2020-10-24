@@ -11,7 +11,12 @@ terraform {
   }
 }
 
-resource "aws_s3_bucket" "application-data-bucket" {
-  bucket = "napi-application-data-bucket"
-  acl    = "private"
+resource "aws_apigatewayv2_api" "api-gateway" {
+  name          = "notes-api"
+  protocol_type = "HTTP"
+}
+
+resource "aws_apigatewayv2_integration" "gateway-integration" {
+  api_id           = aws_apigatewayv2_api.api-gateway.id
+  integration_type = "MOCK"
 }
