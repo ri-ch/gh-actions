@@ -1,3 +1,16 @@
+provider "aws" {
+  region = "eu-west-2"
+}
+
+terraform {
+  backend "s3" {
+    encrypt = true
+    bucket = "tf-state-rc-napi"
+    region = "eu-west-2"
+    key = "infra.tfstate"
+  }
+}
+
 resource "aws_s3_bucket" "terraform-state-storage-s3" {
     bucket = "tf-state-rc-napi"
 
@@ -10,18 +23,6 @@ resource "aws_s3_bucket" "terraform-state-storage-s3" {
     }
 }
 
-resource "aws_dynamodb_table" "dynamodb-terraform-state-lock" {
-    name = "terraform-state-lock-dynamo"
-    hash_key = "LockID"
-    read_capacity = 20
-    write_capacity = 20
-
-    attribute {
-        name = "LockID"
-        type = "S"
-    }
-}
-
 data "aws_iam_policy_document" "terraform-state-access-policy-document" {
   statement {
     sid = "1"
@@ -30,7 +31,7 @@ data "aws_iam_policy_document" "terraform-state-access-policy-document" {
       "s3:ListBucket"
     ]
     resources = [
-        "arn:aws:s3:::tf-state-rc-napi"
+      aws_s3_bucket.terraform-state-storage-s3.arn
     ]
   }
 
@@ -42,7 +43,7 @@ data "aws_iam_policy_document" "terraform-state-access-policy-document" {
       "s3:PutObject"
     ]
     resources = [
-        "arn:aws:s3:::tf-state-rc-napi/*"
+      "${aws_s3_bucket.terraform-state-storage-s3.arn}/*"
     ]
   }
 }
@@ -57,7 +58,7 @@ data "aws_iam_policy_document" "deployment-policy-document" {
     sid = "1"
     effect = "Allow"
     actions = [
-      "s3:ListBucket"
+      "s3:*"
     ]
     resources = [
         "*"
@@ -82,4 +83,14 @@ resource "aws_iam_group_policy_attachment" "group-state-policy-attachment" {
 resource "aws_iam_group_policy_attachment" "group-deployment-policy-attachment" {
     group      = aws_iam_group.deployment_users_group.name
     policy_arn = aws_iam_policy.deployment_policy.arn
+}
+
+resource "aws_iam_group_membership" "deploy-users-membership" {
+  name = "deployment-users-group-membership"
+
+  users = [
+    "github-deployment-user"
+  ]
+
+  group = aws_iam_group.deployment_users_group.name
 }

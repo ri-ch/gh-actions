@@ -19,3 +19,7 @@ jobs:
         run: ./bin/terraform init terraform
       - name: Validate Terraform
         run: ./bin/terraform validate terraform
+      - name: Plan terraform
+        run: ./bin/terraform plan -out=plan.log terraform
+      - name: Apply Terraform
+        run: ./bin/terraform apply plan.log

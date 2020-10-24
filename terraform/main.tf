@@ -8,6 +8,10 @@ terraform {
     bucket = "tf-state-rc-napi"
     region = "eu-west-2"
     key = "napi.tfstate"
-    dynamodb_table = "terraform-state-lock-dynamo"
   }
+}
+
+resource "aws_s3_bucket" "application-data-bucket" {
+  bucket = "napi-application-data-bucket"
+  acl    = "private"
 }
